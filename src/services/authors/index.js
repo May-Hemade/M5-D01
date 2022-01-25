@@ -63,4 +63,14 @@ authorsRouter.delete("/:authorId", (req, res) => {
   fs.writeFileSync(authorsJSONPath, JSON.stringify(remainingAuthors))
   res.status(204).send()
 })
+
+authorsRouter.post("/checkEmail", (req, res) => {
+  const authorsArray = JSON.parse(fs.readFileSync(authorsJSONPath))
+  const email = req.body.email
+  console.log(email)
+  const index = authorsArray.findIndex((author) => author.email == email)
+  //   const emailFound = authorsArray.includes((author) => author.email == email)
+  res.status(200).send({ exists: index >= 0 })
+})
+
 export default authorsRouter
