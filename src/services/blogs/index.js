@@ -3,7 +3,8 @@ import uniqid from "uniqid"
 import createHttpError from "http-errors"
 import { validationResult } from "express-validator"
 import { newBlogValidation } from "./validation.js"
-import { getBlogs, writeBlogs } from "../../lib/fs-tools.js"
+import { getBlogs, saveBlogsCover, writeBlogs } from "../../lib/fs-tools.js"
+import multer from "multer"
 
 const blogsRouter = express.Router()
 
@@ -95,5 +96,32 @@ blogsRouter.delete("/:blogId", async (req, res, next) => {
     next(error)
   }
 })
+
+const upload = multer()
+
+blogsRouter.post(
+  "/:blogId/uploadCover",
+  upload.single("cover"),
+  async (req, res, next) => {
+    try {
+      const blogId = req.params.blogId
+      await saveBlogsCover(`${blogId}.jpg`, req.file.buffer)
+      const url = `http://localhost:3001/img/blogs/${blogId}.jpg`
+      const blogsArray = await getBlogs()
+      const index = blogsArray.findIndex((blog) => blog.id === blogId)
+      const oldBlog = blogsArray[index]
+
+      const updatedBlog = { ...oldBlog, cover: url, updatedAt: new Date() }
+
+      blogsArray[index] = updatedBlog
+
+      await writeBlogs(blogsArray)
+
+      res.send(updatedBlog)
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 export default blogsRouter

@@ -4,6 +4,7 @@ import { validationResult } from "express-validator"
 import { newAuthorValidation } from "./validation.js"
 import { fileURLToPath } from "url"
 import { dirname, join } from "path"
+import { saveAuthorsAvatar } from "../../lib/fs-tools.js"
 
 import multer from "multer"
 import uniqid from "uniqid"
@@ -25,7 +26,7 @@ authorsRouter.get("/:authorId", async (req, res, next) => {
 
     const authorsArray = await getAuthors()
 
-    const foundAuthor = authorsArray.find((author) => author.id === authorId)
+    const foundAuthor = authorsArray.find((author) => author.ID === authorId)
     if (foundAuthor) {
       res.send(foundAuthor)
     } else {
@@ -77,7 +78,7 @@ authorsRouter.put("/:authorId", async (req, res, next) => {
 
     const authorsArray = await getAuthors()
 
-    const index = authorsArray.findIndex((author) => author.id === authorId)
+    const index = authorsArray.findIndex((author) => author.ID === authorId)
 
     const oldAuthor = authorsArray[index]
 
@@ -100,7 +101,7 @@ authorsRouter.delete("/:authorId", async (req, res, next) => {
     const authorsArray = await getAuthors()
 
     const remainingAuthors = authorsArray.filter(
-      (author) => author.id !== authorId
+      (author) => author.ID !== authorId
     )
 
     await writeAuthors(remainingAuthors)
@@ -132,8 +133,19 @@ authorsRouter.post(
   async (req, res, next) => {
     try {
       const authorId = req.params.authorId
-      await saveAuthorsAvatar(authorId, req.file.buffer)
-      res.send("Ok")
+      await saveAuthorsAvatar(`${authorId}.jpg`, req.file.buffer)
+      const url = `/img/authors/${authorId}.jpg`
+      const authorsArray = await getAuthors()
+      const index = authorsArray.findIndex((author) => author.ID === authorId)
+      const oldAuthor = authorsArray[index]
+
+      const updatedAuthor = { ...oldAuthor, avatar: url, updatedAt: new Date() }
+
+      authorsArray[index] = updatedAuthor
+
+      await writeAuthors(authorsArray)
+
+      res.send(updatedAuthor)
     } catch (error) {
       next(error)
     }
