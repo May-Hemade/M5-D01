@@ -134,7 +134,7 @@ authorsRouter.post(
     try {
       const authorId = req.params.authorId
       await saveAuthorsAvatar(`${authorId}.jpg`, req.file.buffer)
-      const url = `/img/authors/${authorId}.jpg`
+      const url = `http://localhost:3001/img/authors/${authorId}.jpg`
       const authorsArray = await getAuthors()
       const index = authorsArray.findIndex((author) => author.ID === authorId)
       const oldAuthor = authorsArray[index]
