@@ -1,34 +1,23 @@
 import express from "express"
-import { fileURLToPath } from "url"
-import { dirname, join } from "path"
 import uniqid from "uniqid"
-import fs from "fs"
 import createHttpError from "http-errors"
 import { validationResult } from "express-validator"
 import { newBlogValidation } from "./validation.js"
+import { getBlogs, writeBlogs } from "../../lib/fs-tools.js"
 
 const blogsRouter = express.Router()
 
-const blogsJSONPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "blogs.json"
-)
-
-const getBlogs = () => JSON.parse(fs.readFileSync(blogsJSONPath))
-const writeBlogs = (content) =>
-  fs.writeFileSync(blogsJSONPath, JSON.stringify(content))
-
-blogsRouter.post("/", newBlogValidation, (req, res, next) => {
+blogsRouter.post("/", newBlogValidation, async (req, res, next) => {
   try {
     const errorsList = validationResult(req)
     if (errorsList.isEmpty()) {
       const newBlog = { ...req.body, createdAt: new Date(), id: uniqid() }
 
-      const blogsArray = getBlogs()
+      const blogsArray = await getBlogs()
 
       blogsArray.push(newBlog)
 
-      writeBlogs(blogsArray)
+      await writeBlogs(blogsArray)
 
       res.status(201).send({ id: newBlog.id })
     } else {
@@ -43,20 +32,20 @@ blogsRouter.post("/", newBlogValidation, (req, res, next) => {
   }
 })
 
-blogsRouter.get("/", (req, res, next) => {
+blogsRouter.get("/", async (req, res, next) => {
   try {
-    const blogsArray = getBlogs()
+    const blogsArray = await getBlogs()
     res.send(blogsArray)
   } catch (error) {
     next(error)
   }
 })
 
-blogsRouter.get("/:blogId", (req, res, next) => {
+blogsRouter.get("/:blogId", async (req, res, next) => {
   try {
-    const blogId = req.params.bookId
+    const blogId = req.params.blogId
 
-    const blogsArray = getBlogs()
+    const blogsArray = await getBlogs()
 
     const foundBlog = blogsArray.find((blog) => blog.id === blogId)
     if (foundBlog) {
@@ -69,11 +58,11 @@ blogsRouter.get("/:blogId", (req, res, next) => {
   }
 })
 
-blogsRouter.put("/:blogId", (req, res, next) => {
+blogsRouter.put("/:blogId", async (req, res, next) => {
   try {
     const blogId = req.params.blogId
 
-    const blogsArray = getBlogs()
+    const blogsArray = await getBlogs()
 
     const index = blogsArray.findIndex((blog) => blog.id === blogId)
 
@@ -83,7 +72,7 @@ blogsRouter.put("/:blogId", (req, res, next) => {
 
     blogsArray[index] = updatedBlog
 
-    writeBlogs(blogsArray)
+    await writeBlogs(blogsArray)
 
     res.send(updatedBlog)
   } catch (error) {
@@ -91,15 +80,15 @@ blogsRouter.put("/:blogId", (req, res, next) => {
   }
 })
 
-blogsRouter.delete("/:blogId", (req, res, next) => {
+blogsRouter.delete("/:blogId", async (req, res, next) => {
   try {
     const blogId = req.params.blogId
 
-    const blogsArray = getBlogs()
+    const blogsArray = await getBlogs()
 
     const remainingBlogs = blogsArray.filter((blog) => blog.id !== blogId)
 
-    writeBlogs(remainingBlogs)
+    await writeBlogs(remainingBlogs)
 
     res.status(204).send()
   } catch (error) {

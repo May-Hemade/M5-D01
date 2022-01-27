@@ -4,6 +4,9 @@ import cors from "cors"
 
 import authorsRouter from "./services/authors/index.js"
 import blogsRouter from "./services/blogs/index.js"
+import filesRouter from "./services/files/index.js"
+
+import { join } from "path"
 import {
   badRequestHandler,
   unauthorizedHandler,
@@ -14,6 +17,7 @@ import createHttpError from "http-errors"
 
 const server = express()
 const port = 3001
+const publicFolderPath = join(process.cwd(), "./public")
 
 const loggerMiddleware = (req, res, next) => {
   console.log(
@@ -22,13 +26,14 @@ const loggerMiddleware = (req, res, next) => {
   req.name = ""
   next()
 }
-
+server.use(express.static(publicFolderPath))
 server.use(loggerMiddleware)
 server.use(cors())
 
 server.use(express.json())
 server.use("/authors", loggerMiddleware, authorsRouter)
 server.use("/blogs", blogsRouter)
+server.use("/files", filesRouter)
 console.table(listEndpoints(server))
 server.use(badRequestHandler)
 server.use(unauthorizedHandler)
