@@ -5,6 +5,9 @@ import { validationResult } from "express-validator"
 import { newBlogValidation } from "./validation.js"
 import { getBlogs, saveBlogsCover, writeBlogs } from "../../lib/fs-tools.js"
 import multer from "multer"
+import { CloudinaryStorage } from "multer-storage-cloudinary"
+
+import { v2 as cloudinary } from "cloudinary"
 
 const blogsRouter = express.Router()
 
@@ -99,7 +102,7 @@ blogsRouter.delete("/:blogId", async (req, res, next) => {
 
 const cloudinaryUploader = multer({
   storage: new CloudinaryStorage({
-    cloudinary, // search automatically for process.env.CLOUDINARY_URL
+    cloudinary,
     params: {
       folder: "oct21",
     },
