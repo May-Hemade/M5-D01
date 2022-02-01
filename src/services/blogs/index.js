@@ -8,6 +8,7 @@ import multer from "multer"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
 
 import { v2 as cloudinary } from "cloudinary"
+import path from "path"
 
 const blogsRouter = express.Router()
 
@@ -115,13 +116,19 @@ blogsRouter.post(
   async (req, res, next) => {
     try {
       const blogId = req.params.blogId
-      await saveBlogsCover(`${blogId}.jpg`, req.file.buffer)
-      const url = `http://localhost:3001/img/blogs/${blogId}.jpg`
+      const extName = path.extname(req.file.originalname)
+      const fileName = `${id}${extName}`
+      await saveBlogsCover(`${blogId}.${extName}`, req.file.buffer)
+      // const url = `http://localhost:3001/img/blogs/${blogId}.${extName}`
       const blogsArray = await getBlogs()
       const index = blogsArray.findIndex((blog) => blog.id === blogId)
       const oldBlog = blogsArray[index]
 
-      const updatedBlog = { ...oldBlog, cover: url, updatedAt: new Date() }
+      const updatedBlog = {
+        ...oldBlog,
+        cover: req.file.path,
+        updatedAt: new Date(),
+      }
 
       blogsArray[index] = updatedBlog
 
