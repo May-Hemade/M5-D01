@@ -3,7 +3,7 @@ import fs from "fs"
 import { validationResult } from "express-validator"
 import { newAuthorValidation } from "./validation.js"
 import { fileURLToPath } from "url"
-import { dirname, join } from "path"
+import { dirname, extname, join } from "path"
 import { saveAuthorsAvatar } from "../../lib/fs-tools.js"
 
 import multer from "multer"
@@ -134,7 +134,7 @@ authorsRouter.post(
     try {
       const authorId = req.params.authorId
       await saveAuthorsAvatar(`${authorId}.jpg`, req.file.buffer)
-      const url = `http://localhost:3001/img/authors/${authorId}.jpg`
+      const url = `http://localhost:3001/img/authors/${authorId}.extname`
       const authorsArray = await getAuthors()
       const index = authorsArray.findIndex((author) => author.ID === authorId)
       const oldAuthor = authorsArray[index]

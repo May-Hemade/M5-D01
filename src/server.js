@@ -16,7 +16,9 @@ import {
 import createHttpError from "http-errors"
 
 const server = express()
-const port = 3001
+
+const port = process.env.PORT || 3002
+
 const publicFolderPath = join(process.cwd(), "./public")
 
 const loggerMiddleware = (req, res, next) => {
@@ -28,7 +30,25 @@ const loggerMiddleware = (req, res, next) => {
 }
 server.use(express.static(publicFolderPath))
 server.use(loggerMiddleware)
-server.use(cors())
+const whiteListedOrigins = [process.env.FE_DEV_URL, process.env.FE_PROD_URL]
+
+console.log("Permitted origins:")
+console.table(whiteListedOrigins)
+
+server.use(
+  cors({
+    origin: function (origin, next) {
+      console.log("ORIGIN: ", origin)
+
+      if (!origin || whiteListedOrigins.indexOf(origin) !== -1) {
+        console.log("YAY!")
+        next(null, true)
+      } else {
+        next(new Error("CORS ERROR!"))
+      }
+    },
+  })
+)
 
 server.use(express.json())
 server.use("/authors", loggerMiddleware, authorsRouter)

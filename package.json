@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon -e js ./src/server.js"
+    "dev": "nodemon -r dotenv/config -e js  ./src/server.js",
+    "start": "node ./src/server.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   },
   "homepage": "https://github.com/May-Hemade/M5-D01#readme",
   "dependencies": {
+    "cloudinary": "^1.28.1",
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "express-list-endpoints": "^6.0.0",
@@ -27,9 +29,11 @@
     "fs-extra": "^10.0.0",
     "http-errors": "^2.0.0",
     "multer": "^1.4.4",
+    "multer-storage-cloudinary": "^4.0.0",
     "uniqid": "^5.4.0"
   },
   "devDependencies": {
+    "dotenv": "^15.0.0",
     "nodemon": "^2.0.15"
   }
 }
