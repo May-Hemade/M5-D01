@@ -116,10 +116,10 @@ blogsRouter.post(
   async (req, res, next) => {
     try {
       const blogId = req.params.blogId
-      const extName = path.extname(req.file.originalname)
-      // const fileName = `${blogId}${extName}`
-      await saveBlogsCover(`${blogId}.${extName}`, req.file.buffer)
-      // const url = `http://localhost:3001/img/blogs/${blogId}.${extName}`
+      // const extName = path.extname(req.file.originalname)
+      // // const fileName = `${blogId}${extName}`
+      // await saveBlogsCover(`${blogId}.${extName}`, req.file.buffer)
+      // // const url = `http://localhost:3001/img/blogs/${blogId}.${extName}`
       const blogsArray = await getBlogs()
       const index = blogsArray.findIndex((blog) => blog.id === blogId)
       const oldBlog = blogsArray[index]
