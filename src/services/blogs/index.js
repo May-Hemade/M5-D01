@@ -97,11 +97,18 @@ blogsRouter.delete("/:blogId", async (req, res, next) => {
   }
 })
 
-const upload = multer()
+const cloudinaryUploader = multer({
+  storage: new CloudinaryStorage({
+    cloudinary, // search automatically for process.env.CLOUDINARY_URL
+    params: {
+      folder: "oct21",
+    },
+  }),
+}).single("cover")
 
 blogsRouter.post(
   "/:blogId/uploadCover",
-  upload.single("cover"),
+  cloudinaryUploader,
   async (req, res, next) => {
     try {
       const blogId = req.params.blogId
