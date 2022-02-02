@@ -1,16 +1,5 @@
 [
   {
-    "category": "CATEGORY 1",
-    "title": "Something",
-    "cover": "http://localhost:3001/img/blogs/sktwi14ngkyvm3oja.jpg",
-    "readTime": { "value": 5, "unit": "minute" },
-    "author": { "name": "May", "avatar": "https://place-puppy.com/100x100" },
-    "content": "HTML",
-    "createdAt": "2022-01-26T13:57:36.117Z",
-    "id": "sktwi14ngkyvm3oja",
-    "updatedAt": "2022-01-27T15:58:42.581Z"
-  },
-  {
     "title": "Something",
     "category": "CATEGORY 1",
     "content": "HTML",
@@ -73,15 +62,7 @@
     "content": "<div class='py-5 blog-content'><p>Ervins, one of the fresh graduates from Strive School's latest Web Development program, joined the Latvia-based digital agency <a href='https://revpanda.com/'>RevPanda</a> three weeks earlier. Were you to ask him at the beginning of the Covid-19 pandemic what he'd be doing now, the answer would have been very different!</p><p>Read on below to learn about Ervins's story and how the soft skills he has gained throughout his career thus far, coupled with the technical training received at Strive, has helped him land a job as a web developer. 👇</p><p>As a salesman in the travel industry, when the pandemic hit, Ervins found himself with a lot of free time. Learning to code was something that rested in the back of Ervins's mind for a while, but he never got around to systematically taking on this challenge. With the unexpected downtime, Ervins decided that instead of sitting at home and rolling his thumbs, now was the perfect opportunity to get on with learning a new skill.</p><p>Like everyone new to programming, the first thing Ervins did was do some simple Google searches for free resources. He watched Youtube tutorials and read blogposts to learn the basics of coding, and stumbled upon <a href='https://strive.school/?utm_source=strive_blog&amp;utm_campaign=i-was-a-salesman-6-months-ago-and-now-i-am-a-professional-web-developer'>Strive School</a> by chance.</p><p>'Strive's message was straight to the point. I visited your website, read through everything, and the rest is history!' Says Ervins.</p><p>As a former salesman, Ervins is cognizant of the advantageous soft skills he brings to the table, but he also appreciated the teamwork skills gained through group projects at Strive.</p><p>'I was told that there were other more experienced candidates for my current job, but what stood out as more important for the hiring managers was my ability to communicate clearly and work in a team. Soft skills are really important even for software engineering.'</p><p>Since joining Strive, Ervins has already recommended a friend to join our new cohort 🙌 &nbsp;And when asked what tips he would give to current and future students at Strive, the wisdom is endless. 'You have to have the ability to overcome adversity,' says Ervins, 'The program was the hardest thing I've done in my life, and you need to be able to cope with feeling overwhelmed.'</p><p>He then adds, 'On top of that, you should also think about developing your social/ soft skills as in the end of the day, you will be working with other people.'</p><p>There isn't a typical day on the job for Ervins, and he hasn't stopped learning new programming frameworks to enhance his technical toolbox. Though he learned the MERN stack during his time at <a href='https://strive.school/?utm_source=strive_blog&amp;utm_campaign=i-was-a-salesman-6-months-ago-and-now-i-am-a-professional-web-developer'>Strive</a>, Ervins is now also working on a new project at work using PHP 🤓 &nbsp;For Ervins, learning doesn't stop here, because after all, this is only the beginning!</p></div>",
     "createdAt": "25 Nov 2020"
   },
-  {
-    "title": "hey ",
-    "category": "Category3",
-    "content": "<p>eee</p>",
-    "createdAt": "2022-01-27T16:07:20.210Z",
-    "id": "sktwi1ad3kyx66dg3",
-    "cover": "http://localhost:3001/img/blogs/sktwi1ad3kyx66dg3.jpg",
-    "updatedAt": "2022-01-27T16:10:41.505Z"
-  },
+
   {
     "title": "qwe",
     "category": "Category1",
@@ -95,5 +76,12 @@
     "content": "<p>something</p>",
     "createdAt": "2022-01-27T16:21:55.702Z",
     "id": "sktwi1ad3kyx6p4za"
+  },
+  {
+    "title": "i am May",
+    "category": "Category1",
+    "content": "<p>hello this is me </p>",
+    "createdAt": "2022-02-02T15:38:37.044Z",
+    "id": "sktwi1vvakz5psjud"
   }
 ]
