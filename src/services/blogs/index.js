@@ -3,12 +3,15 @@ import uniqid from "uniqid"
 import createHttpError from "http-errors"
 import { validationResult } from "express-validator"
 import { newBlogValidation } from "./validation.js"
-import { getBlogs, saveBlogsCover, writeBlogs } from "../../lib/fs-tools.js"
+import { getBlogs, writeBlogs } from "../../lib/fs-tools.js"
 import multer from "multer"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
 
 import { v2 as cloudinary } from "cloudinary"
-import path from "path"
+
+import { getPDFReadableStream } from "../../lib/pdf-tools.js"
+
+import { pipeline } from "stream"
 
 const blogsRouter = express.Router()
 
@@ -52,7 +55,7 @@ blogsRouter.get("/:blogId", async (req, res, next) => {
 
     const blogsArray = await getBlogs()
 
-    const foundBlog = blogsArray.find((blog) => blog.id === blogId)
+    const foundBlog = blogsArray.find((blog) => blog.id == blogId)
     if (foundBlog) {
       res.send(foundBlog)
     } else {
@@ -140,5 +143,24 @@ blogsRouter.post(
     }
   }
 )
+
+blogsRouter.get("/:blogId/downloadPDF", async (req, res, next) => {
+  try {
+    const blogId = req.params.blogId
+
+    const blogsArray = await getBlogs()
+    const blog = blogsArray.find((blog) => blog.id === blogId)
+
+    res.setHeader("Content-Disposition", `attachment; filename=${blogId}.pdf`)
+
+    const source = getPDFReadableStream(blog)
+    const destination = res
+    pipeline(source, destination, (err) => {
+      if (err) next(err)
+    })
+  } catch (error) {
+    next(error)
+  }
+})
 
 export default blogsRouter
