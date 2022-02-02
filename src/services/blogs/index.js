@@ -19,7 +19,16 @@ blogsRouter.post("/", newBlogValidation, async (req, res, next) => {
   try {
     const errorsList = validationResult(req)
     if (errorsList.isEmpty()) {
-      const newBlog = { ...req.body, createdAt: new Date(), id: uniqid() }
+      const newBlog = {
+        ...req.body,
+        createdAt: new Date(),
+        id: uniqid(),
+        readTime: { value: 1, unit: "minute" },
+        author: {
+          name: "May",
+          avatar: "https://place-puppy.com/100x100",
+        },
+      }
 
       const blogsArray = await getBlogs()
 
