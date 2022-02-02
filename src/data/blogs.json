@@ -82,6 +82,10 @@
     "category": "Category1",
     "content": "<p>hello this is me </p>",
     "createdAt": "2022-02-02T15:38:37.044Z",
-    "id": "sktwi1vvakz5psjud"
+    "id": "sktwi1vvakz5psjud",
+    "author": {
+      "name": "Bri Cho",
+      "avatar": "https://striveschool.ghost.io/content/images/2020/11/FBBRRZy5_400x400.jpg"
+    }
   }
 ]
