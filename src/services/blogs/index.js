@@ -55,7 +55,7 @@ blogsRouter.post("/", newBlogValidation, async (req, res, next) => {
 blogsRouter.get("/", async (req, res, next) => {
   try {
     const blogsArray = await getBlogs()
-    res.send(blogsArray)
+    res.send(blogsArray.reverse())
   } catch (error) {
     next(error)
   }
