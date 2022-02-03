@@ -1,15 +1,14 @@
 import express from "express"
-import fs from "fs"
+
 import { validationResult } from "express-validator"
 import { newAuthorValidation } from "./validation.js"
-import { fileURLToPath } from "url"
-import { dirname, extname, join } from "path"
 import { saveAuthorsAvatar } from "../../lib/fs-tools.js"
 
 import multer from "multer"
 import uniqid from "uniqid"
 
 import { getAuthors, writeAuthors } from "../../lib/fs-tools.js"
+import createHttpError from "http-errors"
 
 const authorsRouter = express.Router()
 authorsRouter.get("/", async (req, res, next) => {
@@ -151,4 +150,5 @@ authorsRouter.post(
     }
   }
 )
+
 export default authorsRouter

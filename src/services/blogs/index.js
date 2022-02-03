@@ -6,6 +6,7 @@ import { newBlogValidation } from "./validation.js"
 import { getBlogs, writeBlogs } from "../../lib/fs-tools.js"
 import multer from "multer"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
+import { sendBlogEmail } from "../../lib/email-tools.js"
 
 import { v2 as cloudinary } from "cloudinary"
 
@@ -27,6 +28,7 @@ blogsRouter.post("/", newBlogValidation, async (req, res, next) => {
         author: {
           name: "May",
           avatar: "https://place-puppy.com/100x100",
+          email: "may.hemade1993@gmail.com",
         },
       }
 
@@ -35,6 +37,7 @@ blogsRouter.post("/", newBlogValidation, async (req, res, next) => {
       blogsArray.push(newBlog)
 
       await writeBlogs(blogsArray)
+      await sendBlogEmail(newBlog)
 
       res.status(201).send({ id: newBlog.id })
     } else {

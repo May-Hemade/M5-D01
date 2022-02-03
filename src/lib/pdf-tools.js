@@ -1,9 +1,14 @@
 import PdfPrinter from "pdfmake"
 import htmlToPdfmake from "html-to-pdfmake"
+import fs from "fs-extra"
+import { pipeline } from "stream"
+import { promisify } from "util"
 
 // import pdfFonts from "pdfmake/build/vfs_fonts"
 
 import { JSDOM } from "jsdom"
+import { dirname, join } from "path"
+import { fileURLToPath } from "url"
 const { window } = new JSDOM("")
 
 export const getPDFReadableStream = (blog) => {
@@ -50,4 +55,17 @@ export const getPDFReadableStream = (blog) => {
   pdfReadableStream.end()
 
   return pdfReadableStream
+}
+export const generatePdf = async (blog) => {
+  const pdfReadableStream = getPDFReadableStream(blog)
+
+  const asyncPipeline = promisify(pipeline)
+
+  const pdfPath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    `${blog.id}.pdf`
+  )
+  await asyncPipeline(pdfReadableStream, fs.createWriteStream(pdfPath))
+
+  return pdfPath
 }

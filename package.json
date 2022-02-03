@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/May-Hemade/M5-D01#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.6.0",
     "cloudinary": "^1.28.1",
     "cors": "^2.8.5",
     "express": "^4.17.2",
@@ -30,10 +31,13 @@
     "html-to-pdfmake": "^2.3.8",
     "http-errors": "^2.0.0",
     "jsdom": "^19.0.0",
+    "json2csv": "^5.0.6",
     "multer": "^1.4.4",
     "multer-storage-cloudinary": "^4.0.0",
     "pdfmake": "^0.2.4",
-    "uniqid": "^5.4.0"
+    "swagger-ui-express": "^4.3.0",
+    "uniqid": "^5.4.0",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "dotenv": "^15.0.0",
