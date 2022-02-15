@@ -14,6 +14,7 @@ import {
   genericErrorHandler,
 } from "./errorHandlers.js"
 import createHttpError from "http-errors"
+import mongoose from "mongoose"
 
 const server = express()
 
@@ -59,6 +60,15 @@ server.use(badRequestHandler)
 server.use(unauthorizedHandler)
 server.use(notFoundHandler)
 server.use(genericErrorHandler)
-server.listen(port, () => {
-  console.log(`server is running on port ${port}`)
+
+mongoose.connect(process.env.MONGO_CONNECTION)
+
+mongoose.connection.on("connected", () => {
+  console.log("Successfully connected to Mongo!")
+  server.listen(port, () => {
+    console.table(listEndpoints(server))
+    console.log("Server runnning on port: ", port)
+  })
 })
+
+
