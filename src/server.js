@@ -13,14 +13,11 @@ import {
   notFoundHandler,
   genericErrorHandler,
 } from "./errorHandlers.js"
-import createHttpError from "http-errors"
 import mongoose from "mongoose"
 
 const server = express()
 
 const port = process.env.PORT || 3002
-
-const publicFolderPath = join(process.cwd(), "./public")
 
 const loggerMiddleware = (req, res, next) => {
   console.log(
@@ -29,7 +26,6 @@ const loggerMiddleware = (req, res, next) => {
   req.name = ""
   next()
 }
-server.use(express.static(publicFolderPath))
 server.use(loggerMiddleware)
 const whiteListedOrigins = [process.env.FE_DEV_URL, process.env.FE_PROD_URL]
 
@@ -52,9 +48,9 @@ server.use(
 )
 
 server.use(express.json())
-server.use("/authors", loggerMiddleware, authorsRouter)
+// server.use("/authors", loggerMiddleware, authorsRouter)
 server.use("/blogs", blogsRouter)
-server.use("/files", filesRouter)
+// server.use("/files", filesRouter)
 console.table(listEndpoints(server))
 server.use(badRequestHandler)
 server.use(unauthorizedHandler)
