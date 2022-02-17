@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 
+
 const { Schema, model } = mongoose
 
 const blogSchema = new Schema(
@@ -14,10 +15,7 @@ const blogSchema = new Schema(
       },
       unit: String,
     },
-    author: {
-      name: { type: String, required: true },
-      avatar: String,
-    },
+    authors: [{ type: Schema.Types.ObjectId, ref: "Author" }],
     comments: [
       {
         _id: { type: String },
@@ -29,8 +27,22 @@ const blogSchema = new Schema(
 
   
   {
-    timestamps: true, // adds and manages automatically createdAt and updatedAt fields
+    timestamps: true, 
   }
 )
+
+
+blogSchema.static("findBlogsWithAuthors", async function (mongoQuery) {
+  const total = await this.countDocuments(mongoQuery.criteria)
+  const blogs = await this.find(mongoQuery.criteria)
+    .limit(mongoQuery.options.limit)
+    .skip(mongoQuery.options.skip)
+    .sort(mongoQuery.options.sort) 
+    .populate({
+      path: "authors",
+      select: "name avatar",
+    })
+  return { total, blogs }
+})
 
 export default model("Blog", blogSchema)

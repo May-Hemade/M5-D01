@@ -48,7 +48,7 @@ server.use(
 )
 
 server.use(express.json())
-// server.use("/authors", loggerMiddleware, authorsRouter)
+server.use("/authors", authorsRouter)
 server.use("/blogs", blogsRouter)
 // server.use("/files", filesRouter)
 console.table(listEndpoints(server))
