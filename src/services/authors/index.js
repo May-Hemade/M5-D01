@@ -1,7 +1,7 @@
 import express from "express"
 import createHttpError from "http-errors"
+import { basicAuthMiddleware } from "../auth/basic.js"
 import AuthorsModel from "./schema.js"
-
 
 const authorsRouter = express.Router()
 
@@ -15,7 +15,7 @@ authorsRouter.post("/", async (req, res, next) => {
   }
 })
 
-authorsRouter.get("/", async (req, res, next) => {
+authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
   try {
     const authors = await AuthorsModel.find()
     res.send(authors)
@@ -24,7 +24,26 @@ authorsRouter.get("/", async (req, res, next) => {
   }
 })
 
-authorsRouter.get("/:authorId", async (req, res, next) => {
+authorsRouter.get("/me", basicAuthMiddleware, async (req, res, next) => {
+  try {
+    res.send(req.user)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// authorsRouter.put("/me", basicAuthMiddleware, async (req, res, next) => {
+//   try {
+//     req.user.update({})
+//      await req.user.save()
+
+//     res.send()
+//   } catch (error) {
+//     next(error)
+//   }
+// })
+
+authorsRouter.get("/:authorId", basicAuthMiddleware, async (req, res, next) => {
   try {
     const authorId = req.params.authorId
 
@@ -39,7 +58,7 @@ authorsRouter.get("/:authorId", async (req, res, next) => {
   }
 })
 
-authorsRouter.put("/:authorId", async (req, res, next) => {
+authorsRouter.put("/:authorId", basicAuthMiddleware, async (req, res, next) => {
   try {
     const authorId = req.params.authorId
     const updatedAuthor = await AuthorsModel.findByIdAndUpdate(
@@ -59,18 +78,22 @@ authorsRouter.put("/:authorId", async (req, res, next) => {
   }
 })
 
-authorsRouter.delete("/:authorId", async (req, res, next) => {
-  try {
-    const authorId = req.params.authorId
-    const deletedAuthor = await AuthorsModel.findByIdAndDelete(authorId)
-    if (deletedAuthor) {
-      res.status(204).send()
-    } else {
-      next(createHttpError(404, `Author with id ${authorId} not found!`))
+authorsRouter.delete(
+  "/:authorId",
+  basicAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const authorId = req.params.authorId
+      const deletedAuthor = await AuthorsModel.findByIdAndDelete(authorId)
+      if (deletedAuthor) {
+        res.status(204).send()
+      } else {
+        next(createHttpError(404, `Author with id ${authorId} not found!`))
+      }
+    } catch (error) {
+      next(error)
     }
-  } catch (error) {
-    next(error)
   }
-})
+)
 
 export default authorsRouter

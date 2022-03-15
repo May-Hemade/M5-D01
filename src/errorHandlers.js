@@ -29,3 +29,19 @@ export const genericErrorHandler = (err, req, res, next) => {
   console.log("I am the error handler here is the error: ", err)
   res.status(500).send({ message: "Generic Server Error!" })
 }
+
+export const forbiddenHandler = (err, req, res, next) => {
+  if (err.status === 403) {
+    res
+      .status(403)
+      .send({ message: err.message || "You are not allowed to do that!" })
+  } else {
+    next(err)
+  }
+}
+
+export const catchAllHandler = (err, req, res, next) => {
+  console.log(err)
+
+  res.status(500).send({ message: "Generic Server Error" })
+}

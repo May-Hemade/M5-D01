@@ -12,6 +12,8 @@ import {
   unauthorizedHandler,
   notFoundHandler,
   genericErrorHandler,
+  forbiddenHandler,
+  catchAllHandler,
 } from "./errorHandlers.js"
 import mongoose from "mongoose"
 
@@ -56,6 +58,8 @@ server.use(badRequestHandler)
 server.use(unauthorizedHandler)
 server.use(notFoundHandler)
 server.use(genericErrorHandler)
+server.use(forbiddenHandler)
+server.use(catchAllHandler)
 
 mongoose.connect(process.env.MONGO_CONNECTION)
 
@@ -66,5 +70,3 @@ mongoose.connection.on("connected", () => {
     console.log("Server runnning on port: ", port)
   })
 })
-
-
