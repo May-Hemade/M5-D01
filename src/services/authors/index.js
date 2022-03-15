@@ -2,6 +2,7 @@ import express from "express"
 import createHttpError from "http-errors"
 import { basicAuthMiddleware } from "../auth/basic.js"
 import AuthorsModel from "./schema.js"
+import BlogModel from "../blogs/schema.js"
 
 const authorsRouter = express.Router()
 
@@ -27,6 +28,16 @@ authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
 authorsRouter.get("/me", basicAuthMiddleware, async (req, res, next) => {
   try {
     res.send(req.user)
+  } catch (error) {
+    next(error)
+  }
+})
+
+authorsRouter.get("/me/blogs", basicAuthMiddleware, async (req, res, next) => {
+  try {
+    const author = req.user
+    const blogs = await BlogModel.find({ authors: author._id })
+    res.send(blogs)
   } catch (error) {
     next(error)
   }
