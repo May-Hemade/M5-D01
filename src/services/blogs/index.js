@@ -1,52 +1,17 @@
 import express from "express"
-import uniqid from "uniqid"
 import createHttpError from "http-errors"
-import { validationResult } from "express-validator"
-import { newBlogValidation } from "./validation.js"
-import { getBlogs, writeBlogs } from "../../lib/fs-tools.js"
-import multer from "multer"
-import { CloudinaryStorage } from "multer-storage-cloudinary"
-import { sendBlogEmail } from "../../lib/email-tools.js"
+import BlogsModel from "./schema.js"
+import { v4 as uniqId } from 'uuid'
+import q2m from "query-to-mongo"
 
-import { v2 as cloudinary } from "cloudinary"
-
-import { getPDFReadableStream } from "../../lib/pdf-tools.js"
-
-import { pipeline } from "stream"
 
 const blogsRouter = express.Router()
 
-blogsRouter.post("/", newBlogValidation, async (req, res, next) => {
+blogsRouter.post("/", async (req, res, next) => {
   try {
-    const errorsList = validationResult(req)
-    if (errorsList.isEmpty()) {
-      const newBlog = {
-        ...req.body,
-        createdAt: new Date(),
-        id: uniqid(),
-        readTime: { value: 1, unit: "minute" },
-        author: {
-          name: "May",
-          avatar: "https://place-puppy.com/100x100",
-          email: "may.hemade1993@gmail.com",
-        },
-      }
-
-      const blogsArray = await getBlogs()
-
-      blogsArray.push(newBlog)
-
-      await writeBlogs(blogsArray)
-      await sendBlogEmail(newBlog)
-
-      res.status(201).send({ id: newBlog.id })
-    } else {
-      next(
-        createHttpError(400, "Some errors occurred in request body!", {
-          errorsList,
-        })
-      )
-    }
+    const newBlog = new BlogsModel(req.body) 
+    const { _id } = await newBlog.save()
+    res.status(201).send({ _id })
   } catch (error) {
     next(error)
   }
@@ -54,24 +19,37 @@ blogsRouter.post("/", newBlogValidation, async (req, res, next) => {
 
 blogsRouter.get("/", async (req, res, next) => {
   try {
-    const blogsArray = await getBlogs()
-    res.send(blogsArray.reverse())
-  } catch (error) {
-    next(error)
-  }
+
+    console.log("QUERY ", req.query)
+    console.log("QUERY-TO-MONGO: ", q2m(req.query))
+    const mongoQuery = q2m(req.query)
+
+   const {total,blogs}= await BlogsModel.findBlogsWithAuthors(mongoQuery)
+  res.send({
+    links: mongoQuery.links("/blogs", total),
+    total,
+    totalPages: Math.ceil(total / mongoQuery.options.limit),
+    blogs,
+  })
+} catch (error) { 
+  next(error)
+}
 })
+
+ 
 
 blogsRouter.get("/:blogId", async (req, res, next) => {
   try {
     const blogId = req.params.blogId
 
-    const blogsArray = await getBlogs()
-
-    const foundBlog = blogsArray.find((blog) => blog.id == blogId)
-    if (foundBlog) {
-      res.send(foundBlog)
+    const blog = await BlogsModel.findById(blogId).populate({
+      path: "authors",
+      select: "name avatar",
+    })
+    if (blog) {
+      res.send(blog)
     } else {
-      next(createHttpError(404, `Blog with id ${req.params.blogId} not found!`))
+      next(createHttpError(404, `Blog with id ${blogId} not found!`))
     }
   } catch (error) {
     next(error)
@@ -81,20 +59,14 @@ blogsRouter.get("/:blogId", async (req, res, next) => {
 blogsRouter.put("/:blogId", async (req, res, next) => {
   try {
     const blogId = req.params.blogId
-
-    const blogsArray = await getBlogs()
-
-    const index = blogsArray.findIndex((blog) => blog.id === blogId)
-
-    const oldBlog = blogsArray[index]
-
-    const updatedBlog = { ...oldBlog, ...req.body, updatedAt: new Date() }
-
-    blogsArray[index] = updatedBlog
-
-    await writeBlogs(blogsArray)
-
-    res.send(updatedBlog)
+    const updatedBlog = await BlogsModel.findByIdAndUpdate(blogId, req.body, {
+      new: true, 
+    })
+    if (updatedBlog) {
+      res.send(updatedBlog)
+    } else {
+      next(createHttpError(404, `Blog with id ${blogId} not found!`))
+    }
   } catch (error) {
     next(error)
   }
@@ -103,76 +75,116 @@ blogsRouter.put("/:blogId", async (req, res, next) => {
 blogsRouter.delete("/:blogId", async (req, res, next) => {
   try {
     const blogId = req.params.blogId
-
-    const blogsArray = await getBlogs()
-
-    const remainingBlogs = blogsArray.filter((blog) => blog.id !== blogId)
-
-    await writeBlogs(remainingBlogs)
-
-    res.status(204).send()
+    const deletedBlog = await BlogsModel.findByIdAndDelete(blogId)
+    if (deletedBlog) {
+      res.status(204).send()
+    } else {
+      next(createHttpError(404, `Blog with id ${blogId} not found!`))
+    }
   } catch (error) {
     next(error)
   }
 })
 
-const cloudinaryUploader = multer({
-  storage: new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder: "oct21",
-    },
-  }),
-}).single("cover")
+blogsRouter.post("/:blogId/comments", async (req,res,next) => {
+  try {
+    const commentToInsert= {
+      ...req.body,_id:uniqId()
+    }
+    const modifiedBlog = await BlogsModel.findByIdAndUpdate(req.params.blogId, 
+      {$push: {comments: commentToInsert}},
+      {new:true})
 
-blogsRouter.post(
-  "/:blogId/uploadCover",
-  cloudinaryUploader,
+
+    if (modifiedBlog) {
+      res.send(modifiedBlog)
+  
+    } else {
+      next(
+        createHttpError(404, `Blog with Id ${req.params.blogId} not found!`)
+      ) }
+    
+  } catch (error) {
+    next(error)
+  }
+})
+
+
+blogsRouter.get("/:blogId/comments/:commentId", async (req, res, next) => {
+  try {
+    const blog = await BlogsModel.findById(req.params.blogId)
+    if (blog) {
+      const comment = blog.comments.find(
+        comment => comment._id.toString() === req.params.commentId 
+      )
+      if (comment) {
+        res.send(comment)
+      } else {
+        next(
+          createHttpError(
+            404,
+            `Comment with Id ${req.params.commentId} not found `
+          )
+        )
+      }
+    } else {
+      next(createHttpError(404, `Blog with Id ${req.params.blogId} not found!`))
+    }
+  } catch (error) {
+    next(error)
+  }
+}) 
+
+blogsRouter.put("/:blogId/comments/:commentId", async (req, res, next) => {
+  try {
+    const blog = await BlogsModel.findById(req.params.blogId) 
+    if (blog) {
+      const index = blog.comments.findIndex(
+        comment => comment._id.toString() === req.params.commentId
+      )
+
+      if (index !== -1) {
+     
+        blog.comments[index] = {
+          ...blog.comments[index].toObject(), 
+          ...req.body,
+        }
+
+        await blog.save() 
+        res.send(blog)
+      } else {
+        next(
+          createHttpError(404, `Comment with id ${req.params.commentId} not found!`)
+        )
+      }
+    } else {
+      next(createHttpError(404, `Blog with id ${req.params.blogId} not found!`))
+    }
+  } catch (error) {
+    next(error)
+  }
+}) 
+
+blogsRouter.delete("/:blogId/comments/:commentId",
+  
   async (req, res, next) => {
     try {
-      const blogId = req.params.blogId
-      // const extName = path.extname(req.file.originalname)
-      // // const fileName = `${blogId}${extName}`
-      // await saveBlogsCover(`${blogId}.${extName}`, req.file.buffer)
-      // // const url = `http://localhost:3001/img/blogs/${blogId}.${extName}`
-      const blogsArray = await getBlogs()
-      const index = blogsArray.findIndex((blog) => blog.id === blogId)
-      const oldBlog = blogsArray[index]
-
-      const updatedBlog = {
-        ...oldBlog,
-        cover: req.file.path,
-        updatedAt: new Date(),
+      const modifiedBlog = await BlogsModel.findByIdAndUpdate(
+        req.params.blogId,
+        { $pull: { comments: { _id: req.params.commentId } } },
+        { new: true } 
+      )
+      if (modifiedBlog) {
+        res.send(modifiedBlog)
+      } else {
+        next(
+          createHttpError(404, `Blog with id ${req.params.blogId} not found!`)
+        )
       }
-
-      blogsArray[index] = updatedBlog
-
-      await writeBlogs(blogsArray)
-
-      res.send(updatedBlog)
     } catch (error) {
       next(error)
     }
   }
 )
-
-blogsRouter.get("/:blogId/downloadPDF", async (req, res, next) => {
-  try {
-    const blogId = req.params.blogId
-
-    const blogsArray = await getBlogs()
-    const blog = blogsArray.find((blog) => blog.id === blogId)
-
-    res.setHeader("Content-Disposition", `attachment; filename=${blogId}.pdf`)
-
-    const source = getPDFReadableStream(blog)
-    const destination = res
-    pipeline(source, destination, (err) => {
-      if (err) next(err)
-    })
-  } catch (error) {
-    next(error)
-  }
-})
 
 export default blogsRouter
