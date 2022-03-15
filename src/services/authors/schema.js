@@ -15,4 +15,4 @@ const AuthorSchema = new Schema(
 
 
 
-export default model("Authors", AuthorSchema)
+export default model("Author", AuthorSchema)

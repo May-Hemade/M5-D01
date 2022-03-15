@@ -23,7 +23,13 @@ const blogSchema = new Schema(
         rate: { type: Number },
       },
     ],
+
+    likes: [
+      { type: Schema.Types.ObjectId, ref: "Author"}
+    ]
   },
+
+
 
   
   {

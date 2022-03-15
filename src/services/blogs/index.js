@@ -31,7 +31,7 @@ blogsRouter.get("/", async (req, res, next) => {
     totalPages: Math.ceil(total / mongoQuery.options.limit),
     blogs,
   })
-} catch (error) {npm 
+} catch (error) { 
   next(error)
 }
 })
