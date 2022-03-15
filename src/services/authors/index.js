@@ -16,6 +16,21 @@ authorsRouter.post("/", async (req, res, next) => {
   }
 })
 
+authorsRouter.post("/login", async (req, res, next) => {
+  try {
+    const { email, password } = req.body
+    const itMatches = await AuthorsModel.checkCredentials(email, password)
+    if (itMatches) {
+      const token = Buffer.from(`${email}:${password}`).toString("base64")
+      res.status(201).send({ token })
+    } else {
+      res.status(401).send("not gonna happen")
+    }
+  } catch (error) {
+    next(error)
+  }
+})
+
 authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
   try {
     const authors = await AuthorsModel.find()
