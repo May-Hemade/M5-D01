@@ -4,11 +4,12 @@ import BlogsModel from "./schema.js"
 import { v4 as uniqId } from "uuid"
 import q2m from "query-to-mongo"
 import { blogAuthorMiddleware } from "../auth/author.js"
-import { basicAuthMiddleware } from "../auth/basic.js"
+
+import { JWTAuthMiddleware } from "../auth/token.js"
 
 const blogsRouter = express.Router()
 
-blogsRouter.post("/", basicAuthMiddleware, async (req, res, next) => {
+blogsRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const newBlog = new BlogsModel(req.body)
     const { _id } = await newBlog.save()
@@ -56,7 +57,7 @@ blogsRouter.get("/:blogId", async (req, res, next) => {
 
 blogsRouter.put(
   "/:blogId",
-  basicAuthMiddleware,
+  JWTAuthMiddleware,
   blogAuthorMiddleware,
   async (req, res, next) => {
     try {
@@ -77,7 +78,7 @@ blogsRouter.put(
 
 blogsRouter.delete(
   "/:blogId",
-  basicAuthMiddleware,
+  JWTAuthMiddleware,
   blogAuthorMiddleware,
   async (req, res, next) => {
     try {

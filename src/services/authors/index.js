@@ -3,7 +3,8 @@ import createHttpError from "http-errors"
 import { basicAuthMiddleware } from "../auth/basic.js"
 import AuthorsModel from "./schema.js"
 import BlogModel from "../blogs/schema.js"
-
+import { authenticateUser } from "../auth/tools.js"
+import { JWTAuthMiddleware } from "../auth/token.js"
 const authorsRouter = express.Router()
 
 authorsRouter.post("/", async (req, res, next) => {
@@ -16,22 +17,32 @@ authorsRouter.post("/", async (req, res, next) => {
   }
 })
 
+authorsRouter.post("/register", async (req, res, next) => {
+  try {
+    const newAuthor = new AuthorsModel(req.body)
+    const { _id } = await newAuthor.save()
+    res.status(201).send({ _id })
+  } catch (error) {
+    next(error)
+  }
+})
+
 authorsRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body
-    const itMatches = await AuthorsModel.checkCredentials(email, password)
-    if (itMatches) {
-      const token = Buffer.from(`${email}:${password}`).toString("base64")
-      res.status(201).send({ token })
+    const author = await AuthorsModel.checkCredentials(email, password)
+    if (author) {
+      const accessToken = await authenticateUser(author)
+      res.status(201).send({ accessToken })
     } else {
-      res.status(401).send("not gonna happen")
+      next(createError(401, "not gonna happen"))
     }
   } catch (error) {
     next(error)
   }
 })
 
-authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const authors = await AuthorsModel.find()
     res.send(authors)
@@ -40,7 +51,7 @@ authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
   }
 })
 
-authorsRouter.get("/me", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     res.send(req.user)
   } catch (error) {
@@ -48,7 +59,7 @@ authorsRouter.get("/me", basicAuthMiddleware, async (req, res, next) => {
   }
 })
 
-authorsRouter.get("/me/blogs", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.get("/me/blogs", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const author = req.user
     const blogs = await BlogModel.find({ authors: author._id })
@@ -69,7 +80,7 @@ authorsRouter.get("/me/blogs", basicAuthMiddleware, async (req, res, next) => {
 //   }
 // })
 
-authorsRouter.get("/:authorId", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.get("/:authorId", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const authorId = req.params.authorId
 
@@ -84,7 +95,7 @@ authorsRouter.get("/:authorId", basicAuthMiddleware, async (req, res, next) => {
   }
 })
 
-authorsRouter.put("/:authorId", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.put("/:authorId", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const authorId = req.params.authorId
     const updatedAuthor = await AuthorsModel.findByIdAndUpdate(
@@ -106,7 +117,7 @@ authorsRouter.put("/:authorId", basicAuthMiddleware, async (req, res, next) => {
 
 authorsRouter.delete(
   "/:authorId",
-  basicAuthMiddleware,
+  JWTAuthMiddleware,
   async (req, res, next) => {
     try {
       const authorId = req.params.authorId
