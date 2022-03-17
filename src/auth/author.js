@@ -1,4 +1,4 @@
-import BlogModel from "../blogs/schema.js"
+import BlogModel from "../services/blogs/schema.js"
 import createError from "http-errors"
 
 export const blogAuthorMiddleware = async (req, res, next) => {

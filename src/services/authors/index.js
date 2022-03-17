@@ -1,10 +1,11 @@
 import express from "express"
 import createHttpError from "http-errors"
-import { basicAuthMiddleware } from "../auth/basic.js"
 import AuthorsModel from "./schema.js"
 import BlogModel from "../blogs/schema.js"
-import { authenticateUser } from "../auth/tools.js"
-import { JWTAuthMiddleware } from "../auth/token.js"
+import { authenticateUser } from "../../auth/tools.js"
+import { JWTAuthMiddleware } from "../../auth/token.js"
+import passport from "passport"
+
 const authorsRouter = express.Router()
 
 authorsRouter.post("/", async (req, res, next) => {
@@ -19,6 +20,7 @@ authorsRouter.post("/", async (req, res, next) => {
 
 authorsRouter.post("/register", async (req, res, next) => {
   try {
+    console.log(req.body)
     const newAuthor = new AuthorsModel(req.body)
     const { _id } = await newAuthor.save()
     res.status(201).send({ _id })
@@ -79,6 +81,35 @@ authorsRouter.get("/me/blogs", JWTAuthMiddleware, async (req, res, next) => {
 //     next(error)
 //   }
 // })
+
+authorsRouter.get(
+  "/googleLogin",
+  passport.authenticate("google", { scope: ["email", "profile"] })
+) 
+
+authorsRouter.get(
+  "/googleRedirect",
+  passport.authenticate("google"),
+  (req, res, next) => {
+    try {
+  
+      console.log(req.user.token)
+     
+
+      if (req.user.role === "Admin") {
+        res.redirect(
+          `${process.env.FE_URL}/admin?accessToken=${req.user.token}`
+        )
+      } else {
+        res.redirect(
+          `${process.env.FE_URL}/profile?accessToken=${req.user.token}`
+        )
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 authorsRouter.get("/:authorId", JWTAuthMiddleware, async (req, res, next) => {
   try {

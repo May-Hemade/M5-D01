@@ -3,9 +3,9 @@ import createHttpError from "http-errors"
 import BlogsModel from "./schema.js"
 import { v4 as uniqId } from "uuid"
 import q2m from "query-to-mongo"
-import { blogAuthorMiddleware } from "../auth/author.js"
+import { blogAuthorMiddleware } from "../../auth/author.js"
 
-import { JWTAuthMiddleware } from "../auth/token.js"
+import { JWTAuthMiddleware } from "../../auth/token.js"
 
 const blogsRouter = express.Router()
 

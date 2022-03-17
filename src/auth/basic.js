@@ -1,6 +1,6 @@
 import createError from "http-errors"
 import atob from "atob"
-import AuthorModel from "../authors/schema.js"
+import AuthorModel from "../services/authors/schema.js"
 
 export const basicAuthMiddleware = async (req, res, next) => {
   if (!req.headers.authorization) {

@@ -1,6 +1,7 @@
 import express from "express"
 import listEndpoints from "express-list-endpoints"
 import cors from "cors"
+import passport from "passport"
 
 import authorsRouter from "./services/authors/index.js"
 import blogsRouter from "./services/blogs/index.js"
@@ -16,10 +17,13 @@ import {
   catchAllHandler,
 } from "./errorHandlers.js"
 import mongoose from "mongoose"
+import googleStrategy from "./auth/oauth.js"
 
 const server = express()
 
 const port = process.env.PORT || 3002
+
+passport.use("google", googleStrategy)
 
 const loggerMiddleware = (req, res, next) => {
   console.log(
@@ -33,6 +37,8 @@ const whiteListedOrigins = [process.env.FE_DEV_URL, process.env.FE_PROD_URL]
 
 console.log("Permitted origins:")
 console.table(whiteListedOrigins)
+
+passport.use("google", googleStrategy)
 
 server.use(
   cors({
@@ -50,6 +56,7 @@ server.use(
 )
 
 server.use(express.json())
+server.use(passport.initialize())
 server.use("/authors", authorsRouter)
 server.use("/blogs", blogsRouter)
 // server.use("/files", filesRouter)

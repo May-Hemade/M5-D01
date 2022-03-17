@@ -38,6 +38,8 @@
     "mongoose": "^6.2.1",
     "multer": "^1.4.4",
     "multer-storage-cloudinary": "^4.0.0",
+    "passport": "^0.5.2",
+    "passport-google-oauth20": "^2.0.0",
     "pdfmake": "^0.2.4",
     "query-to-mongo": "^0.10.1",
     "swagger-ui-express": "^4.3.0",
