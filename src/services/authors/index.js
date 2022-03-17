@@ -85,25 +85,21 @@ authorsRouter.get("/me/blogs", JWTAuthMiddleware, async (req, res, next) => {
 authorsRouter.get(
   "/googleLogin",
   passport.authenticate("google", { scope: ["email", "profile"] })
-) 
+)
 
 authorsRouter.get(
   "/googleRedirect",
   passport.authenticate("google"),
   (req, res, next) => {
     try {
-  
       console.log(req.user.token)
-     
 
       if (req.user.role === "Admin") {
         res.redirect(
-          `${process.env.FE_URL}/admin?accessToken=${req.user.token}`
+          `${process.env.FE_DEV_URL}/admin?accessToken=${req.user.token}`
         )
       } else {
-        res.redirect(
-          `${process.env.FE_URL}/profile?accessToken=${req.user.token}`
-        )
+        res.redirect(`${process.env.FE_DEV_URL}/?accessToken=${req.user.token}`)
       }
     } catch (error) {
       next(error)
